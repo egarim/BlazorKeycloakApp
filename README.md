@@ -1,14 +1,72 @@
 # BlazorKeycloakApp
 
-This repository contains a Blazor solution demonstrating authentication with Keycloak, consisting of two applications:
+This repository contains a comprehensive Blazor solution demonstrating authentication with Keycloak, consisting of two applications:
 - **BlazorServer**: A Blazor Server application using OpenID Connect authentication
 - **BlazorApi**: A Web API using JWT Bearer authentication
+
+## 🚀 Quick Start
+
+### Prerequisites
+- .NET 9.0 SDK
+- Keycloak server running on http://localhost:8080
+- PowerShell (for setup scripts)
+
+### Setup Steps
+
+1. **Start Keycloak** (if not already running)
+2. **Run the automated setup**:
+   ```powershell
+   .\setup-keycloak-complete.ps1
+   ```
+3. **Start the applications**:
+   ```powershell
+   # Terminal 1 - API
+   cd BlazorApi
+   dotnet run
+   
+   # Terminal 2 - Blazor Server
+   cd BlazorServer
+   dotnet run
+   ```
+4. **Test the application**:
+   - Navigate to: https://localhost:7001
+   - Login with: `testuser / Test123!`
+   - Test API endpoints at: https://localhost:7001/api-test
+   - Test with Swagger UI at: https://localhost:7002
+
+## 🔧 Features & Tools
+
+### 🔍 Comprehensive Diagnostics
+The application includes advanced debugging tools accessible at `/api-test`:
+
+- **🔍 Run Full Diagnostics**: Complete authentication analysis
+- **🎟️ Analyze Token**: Deep JWT token inspection with audience/issuer validation
+- **🔒 Test Protected Endpoint**: Detailed HTTP request/response analysis
+- **⚙️ Check Configuration**: Verify all settings
+- **📋 Copy Token**: One-click token copying for Swagger testing
+
+### 🔧 Swagger UI with JWT Authentication
+Enhanced Swagger UI with JWT Bearer token support:
+- **URL**: https://localhost:7002
+- **Features**: 
+  - JWT Bearer authentication
+  - Test all endpoints directly
+  - Detailed authentication debugging endpoints
+  - Copy tokens directly from Blazor app
+
+### 🛠️ Setup & Management Scripts
+
+| Script | Purpose |
+|--------|---------|
+| `setup-keycloak-complete.ps1` | **Complete automated setup** - Creates realm, clients, users, roles, and audience mappers |
+| `delete-realm.ps1` | **Clean slate** - Safely deletes realm for fresh start |
+| `setup-keycloak-complete.ps1 -UpdateOnly` | **Update existing** - Updates client configuration only |
 
 ## About Keycloak
 
 Keycloak is an open-source Identity and Access Management solution that provides single sign-on with Identity and Access Management for applications and services. This application uses Keycloak as the central authentication server for both the Blazor Server app and the API.
 
-## Authentication Implementation
+## 🔐 Authentication Implementation
 
 ### BlazorServer Authentication
 
@@ -220,13 +278,33 @@ The application includes test credentials for development:
 
 ## Features
 
+### Core Authentication
 - **Secure Authentication**: Full OpenID Connect implementation with Keycloak
 - **Role-Based Access Control**: Admin and user roles with different permissions
 - **JWT Token Integration**: Seamless token passing between Blazor Server and API
 - **Session Management**: Proper login/logout flows with token cleanup
 - **API Integration**: Authenticated API calls from Blazor Server to Web API
 - **Error Handling**: Comprehensive authentication error handling and logging
-- **Automated Setup**: Complete PowerShell automation for Keycloak configuration
+
+### Developer Tools & Diagnostics
+- **ApiTest Page**: Comprehensive testing interface with real-time diagnostics
+- **Token Analysis**: Detailed JWT token inspection with claims visualization
+- **Authentication Diagnostics**: Deep analysis of authentication flow and potential issues
+- **Token Copy Functionality**: Easy copying of access tokens for external testing tools
+- **API Configuration Validation**: Automated checks for common configuration issues
+- **Swagger Integration**: Full JWT authentication support in API documentation
+
+### Testing & Documentation
+- **Swagger UI**: Interactive API documentation with JWT Bearer authentication
+- **Automated Testing**: Built-in endpoint testing with authentication validation
+- **Debugging Tools**: Specialized controllers and services for authentication troubleshooting
+- **Comprehensive Logging**: Detailed error reporting and diagnostic information
+
+### Automation & Setup
+- **Complete Setup Script**: One-click Keycloak realm and client configuration
+- **Audience Mapper Configuration**: Automatic JWT audience claim setup
+- **Clean Deletion Script**: Safe realm cleanup for fresh starts
+- **Update Scripts**: Easy configuration updates and fixes
 
 ## Development Notes
 
@@ -236,3 +314,111 @@ The application includes test credentials for development:
 - Role claims are automatically transformed from Keycloak's realm roles
 - CORS is configured to allow requests from the Blazor Server app to the API
 - All necessary redirect URIs are pre-configured for seamless authentication flows
+
+## Advanced Tools & Testing
+
+### Swagger UI Integration
+The API includes comprehensive Swagger documentation with JWT authentication:
+
+1. **Start the API**: `dotnet run` in the BlazorApi directory
+2. **Open Swagger**: Navigate to `https://localhost:7049/swagger`
+3. **Authenticate**: Click "Authorize" and enter your JWT token (get it from ApiTest page)
+4. **Test Endpoints**: Execute any protected endpoint directly from Swagger
+
+### ApiTest Diagnostic Tools
+The enhanced ApiTest page (`/apitest`) provides comprehensive debugging:
+
+- **Real-time Token Analysis**: View JWT claims and validation status
+- **Authentication Flow Testing**: Step-by-step verification of auth process
+- **API Configuration Checks**: Automatic validation of common setup issues
+- **Token Copy Feature**: Easy copying of access tokens for external tools
+- **Endpoint Testing**: Direct testing of protected and unprotected endpoints
+
+### Debugging Controllers
+The API includes specialized debugging endpoints:
+
+- `/api/authtest/claims` - View current user claims
+- `/api/authtest/token-info` - Detailed token analysis
+- `/api/authtest/test-auth` - Authentication status verification
+
+### PowerShell Automation Scripts
+
+#### Complete Setup Script
+```powershell
+# Full automated setup with all features
+.\setup-keycloak-complete.ps1
+
+# Update existing configuration only
+.\setup-keycloak-complete.ps1 -UpdateOnly
+
+# Show manual setup instructions
+.\setup-keycloak-complete.ps1 -ShowInstructions
+```
+
+#### Clean Slate Script
+```powershell
+# Safely delete realm and all associated data
+.\delete-realm.ps1
+
+# Confirm deletion (will prompt for confirmation)
+.\delete-realm.ps1 -Confirm
+```
+
+#### Client Update Script
+```powershell
+# Update client configuration only
+.\update-keycloak-client.ps1
+```
+
+### Troubleshooting Tools
+
+#### Authentication Diagnostics Service
+The `ApiDiagnosticsService` provides comprehensive analysis:
+
+- Token validation and claims inspection
+- API configuration verification
+- Authentication flow analysis
+- Common issue detection and solutions
+
+#### Common Fixes
+
+1. **Missing Audience Claim**: The setup script now automatically creates audience mappers
+2. **CORS Issues**: Pre-configured in both setup script and API startup
+3. **Redirect URI Mismatches**: All common URIs are automatically configured
+4. **Token Validation Errors**: Enhanced error reporting with specific solutions
+
+### Fresh Start Process
+
+To completely reset and verify everything works:
+
+1. **Delete existing realm**:
+   ```powershell
+   .\delete-realm.ps1
+   ```
+
+2. **Run complete setup**:
+   ```powershell
+   .\setup-keycloak-complete.ps1
+   ```
+
+3. **Test authentication**:
+   - Login at `https://localhost:7001`
+   - Visit `/apitest` page
+   - Run diagnostics
+   - Test Swagger UI at `https://localhost:7049/swagger`
+
+## Architecture
+
+### Authentication Flow
+1. User initiates login via Blazor Server
+2. Redirected to Keycloak for authentication
+3. Keycloak returns authorization code
+4. Blazor Server exchanges code for tokens
+5. Access token used for API calls
+6. JWT tokens include proper audience claims for API validation
+
+### Token Management
+- Access tokens automatically included in API requests
+- Tokens cached and managed by authentication middleware
+- Automatic token refresh handled by the framework
+- Comprehensive token analysis available via diagnostic tools

@@ -1,10 +1,42 @@
 # Complete Keycloak Setup Script for Blazor Server + C# REST API
-# This script creates a realm, configures clients, and handles all redirect URI configurations
+# This script creates a realm, configures clients, and handles all redirect URI config    try {
+        Invoke-KeycloakApi -Uri "$KeycloakUrl/admin/realms/$RealmName/clients/$blazorClientUuid" -Method Put -Body $updatedClient -Token $Token
+        Write-Host "✅ Client configuration updated successfully" -ForegroundColor Green
+        
+        # Add audience mapper if it doesn't exist
+        Write-Host "🎯 Ensuring audience mapper exists..." -ForegroundColor Yellow
+        $audienceMapper = @{
+            name = "audience-mapper"
+            protocol = "openid-connect"
+            protocolMapper = "oidc-audience-mapper"
+            consentRequired = $false
+            config = @{
+                "included.client.audience" = "blazor-api"
+                "id.token.claim" = "false"
+                "access.token.claim" = "true"
+            }
+        }
+        
+        try {
+            Invoke-KeycloakApi -Uri "$KeycloakUrl/admin/realms/$RealmName/clients/$blazorClientUuid/protocol-mappers/models" -Method Post -Body $audienceMapper -Token $Token
+            Write-Host "✅ Audience mapper added" -ForegroundColor Green
+        }
+        catch {
+            if ($_.Exception.Message -like "*409*") {
+                Write-Host "⚠️  Audience mapper already exists" -ForegroundColor Yellow
+            }
+            else {
+                Write-Warning "Failed to create audience mapper: $($_.Exception.Message)"
+            }
+        }
+        
+        return $true
+    }ons
 
 param(
     [string]$KeycloakUrl = "http://localhost:8080/",
     [string]$AdminUsername = "admin",
-    [string]$AdminPassword = "admin",
+    [string]$AdminPassword = "JoseManuel16",
     [string]$RealmName = "blazor-app",
     [string]$BlazorClientId = "blazor-server",
     [string]$ApiClientId = "blazor-api",
@@ -307,6 +339,34 @@ $blazorClientUuid = $clients[0].id
 # Get client secret
 $clientSecret = Invoke-KeycloakApi -Uri "$KeycloakUrl/admin/realms/$RealmName/clients/$blazorClientUuid/client-secret" -Token $adminToken
 
+# CRITICAL: Add audience mapper to include API audience in JWT tokens
+Write-Host "🎯 Adding audience mapper for JWT tokens..." -ForegroundColor Yellow
+$audienceMapper = @{
+    name = "audience-mapper"
+    protocol = "openid-connect"
+    protocolMapper = "oidc-audience-mapper"
+    consentRequired = $false
+    config = @{
+        "included.client.audience" = $ApiClientId
+        "id.token.claim" = "false"
+        "access.token.claim" = "true"
+    }
+}
+
+try {
+    Invoke-KeycloakApi -Uri "$KeycloakUrl/admin/realms/$RealmName/clients/$blazorClientUuid/protocol-mappers/models" -Method Post -Body $audienceMapper -Token $adminToken
+    Write-Host "✅ Audience mapper created - JWT tokens will now include 'aud: [$ApiClientId]'" -ForegroundColor Green
+}
+catch {
+    if ($_.Exception.Message -like "*409*") {
+        Write-Host "⚠️  Audience mapper already exists" -ForegroundColor Yellow
+    }
+    else {
+        Write-Warning "Failed to create audience mapper: $($_.Exception.Message)"
+        Write-Host "📝 Manual fix required: Add audience mapper in Keycloak admin console" -ForegroundColor Red
+    }
+}
+
 # Create API client (Resource Server)
 Write-Host "?? Creating API client..." -ForegroundColor Yellow
 $apiClient = @{
@@ -365,7 +425,7 @@ foreach ($roleName in $roles) {
 }
 
 # Create a test user (optional)
-Write-Host "?? Creating test user..." -ForegroundColor Yellow
+Write-Host "👤 Creating test user..." -ForegroundColor Yellow
 $testUser = @{
     username = "testuser"
     email = "test@example.com"
@@ -380,12 +440,31 @@ $testUser = @{
             temporary = $false
         }
     )
-    realmRoles = @("user")
 }
 
 try {
     Invoke-KeycloakApi -Uri "$KeycloakUrl/admin/realms/$RealmName/users" -Method Post -Body $testUser -Token $adminToken
-    Write-Host "? Test user 'testuser' created (password: Test123!)" -ForegroundColor Green
+    Write-Host "✅ Test user 'testuser' created (password: Test123!)" -ForegroundColor Green
+    
+    # Get the created user to assign roles
+    $users = Invoke-KeycloakApi -Uri "$KeycloakUrl/admin/realms/$RealmName/users?username=testuser" -Token $adminToken
+    if ($users.Count -gt 0) {
+        $testUserUuid = $users[0].id
+        
+        # Assign admin and user roles
+        $adminRole = Invoke-KeycloakApi -Uri "$KeycloakUrl/admin/realms/$RealmName/roles/admin" -Token $adminToken
+        $userRole = Invoke-KeycloakApi -Uri "$KeycloakUrl/admin/realms/$RealmName/roles/user" -Token $adminToken
+        
+        $rolesToAssign = @($adminRole, $userRole)
+        
+        try {
+            Invoke-KeycloakApi -Uri "$KeycloakUrl/admin/realms/$RealmName/users/$testUserUuid/role-mappings/realm" -Method Post -Body $rolesToAssign -Token $adminToken
+            Write-Host "✅ Assigned 'admin' and 'user' roles to testuser" -ForegroundColor Green
+        }
+        catch {
+            Write-Warning "Failed to assign roles to test user: $($_.Exception.Message)"
+        }
+    }
 }
 catch {
     if ($_.Exception.Message -like "*409*") {
@@ -412,15 +491,18 @@ Write-Host "  Client ID: $BlazorClientId" -ForegroundColor Gray
 Write-Host "  Client Secret: $($clientSecret.value)" -ForegroundColor Yellow
 Write-Host "  Type: Confidential (server-side)" -ForegroundColor Gray
 Write-Host "  Redirect URIs configured for all authentication scenarios" -ForegroundColor Green
+Write-Host "  Audience Mapper: ✅ Configured to include '$ApiClientId' in JWT tokens" -ForegroundColor Green
 Write-Host ""
 Write-Host "API Client:" -ForegroundColor White
 Write-Host "  Client ID: $ApiClientId" -ForegroundColor Gray
 Write-Host "  Type: Bearer-only (resource server)" -ForegroundColor Gray
+Write-Host "  Audience Validation: Expects 'aud: [$ApiClientId]' in JWT tokens" -ForegroundColor Gray
 Write-Host ""
 Write-Host "Test User:" -ForegroundColor White
 Write-Host "  Username: testuser" -ForegroundColor Gray
 Write-Host "  Password: Test123!" -ForegroundColor Yellow
 Write-Host "  Email: test@example.com" -ForegroundColor Gray
+Write-Host "  Roles: admin, user (can access all endpoints)" -ForegroundColor Green
 Write-Host ""
 Write-Host "Next Steps:" -ForegroundColor White
 Write-Host "1. Update your appsettings.json files with the configuration above" -ForegroundColor Gray

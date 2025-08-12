@@ -157,6 +157,15 @@ builder.Services.AddAuthorization(options =>
 // Register services
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<BlazorServer.Services.IAuthService, BlazorServer.Services.AuthService>();
+builder.Services.AddScoped<BlazorServer.Services.IApiDiagnosticsService>(provider =>
+{
+    var httpClientFactory = provider.GetRequiredService<IHttpClientFactory>();
+    var httpClient = httpClientFactory.CreateClient("ApiClient");
+    var authService = provider.GetRequiredService<BlazorServer.Services.IAuthService>();
+    var configuration = provider.GetRequiredService<IConfiguration>();
+    var logger = provider.GetRequiredService<ILogger<BlazorServer.Services.ApiDiagnosticsService>>();
+    return new BlazorServer.Services.ApiDiagnosticsService(httpClient, authService, configuration, logger);
+});
 
 var app = builder.Build();
 
