@@ -1,0 +1,149 @@
+@page "/api-test"
+@using Microsoft.AspNetCore.Authorization
+@using BlazorServer.Services
+@inject IApiService ApiService
+@inject IAuthService AuthService
+@attribute [Authorize]
+
+<PageTitle>API Test</PageTitle>
+
+<h1>API Integration Test</h1>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5>API Connection Status</h5>
+            </div>
+            <div class="card-body">
+                <button class="btn btn-primary" @onclick="TestConnection">Test API Connection</button>
+                @if (connectionStatus != null)
+                {
+                    <div class="alert @(connectionStatus.Value ? "alert-success" : "alert-danger") mt-2">
+                        API Connection: @(connectionStatus.Value ? "✅ Success" : "❌ Failed")
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5>Public API Endpoints (No Authentication Required)</h5>
+            </div>
+            <div class="card-body">
+                <button class="btn btn-secondary" @onclick="CallPublicEndpoint">Call /api/values</button>
+                @if (!string.IsNullOrEmpty(publicResult))
+                {
+                    <div class="mt-2">
+                        <strong>Response:</strong>
+                        <pre class="bg-light p-2">@publicResult</pre>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5>Protected API Endpoints (Authentication Required)</h5>
+            </div>
+            <div class="card-body">
+                <div class="btn-group mb-2" role="group">
+                    <button class="btn btn-warning" @onclick="CallProtectedEndpoint">Call /api/values/protected</button>
+                    <button class="btn btn-info" @onclick="CallUserProfile">Call /api/user/profile</button>
+                    <button class="btn btn-success" @onclick="CallUserData">Call /api/user/user-data</button>
+                </div>
+                @if (!string.IsNullOrEmpty(protectedResult))
+                {
+                    <div class="mt-2">
+                        <strong>Response:</strong>
+                        <pre class="bg-light p-2">@protectedResult</pre>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5>Admin-Only API Endpoints (Admin Role Required)</h5>
+            </div>
+            <div class="card-body">
+                <div class="btn-group mb-2" role="group">
+                    <button class="btn btn-danger" @onclick="CallAdminEndpoint">Call /api/values/admin-only</button>
+                    <button class="btn btn-danger" @onclick="CallAdminUserEndpoint">Call /api/user/admin-only</button>
+                </div>
+                @if (!string.IsNullOrEmpty(adminResult))
+                {
+                    <div class="mt-2">
+                        <strong>Response:</strong>
+                        <pre class="bg-light p-2">@adminResult</pre>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5>Current Access Token</h5>
+            </div>
+            <div class="card-body">
+                <button class="btn btn-outline-primary" @onclick="ShowAccessToken">Show Current Access Token</button>
+                @if (!string.IsNullOrEmpty(accessToken))
+                {
+                    <div class="mt-2">
+                        <strong>Access Token (first 100 characters):</strong>
+                        <pre class="bg-light p-2" style="word-break: break-all;">@accessToken.Substring(0, Math.Min(100, accessToken.Length))...</pre>
+                        <small class="text-muted">Token Length: @accessToken.Length characters</small>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private bool? connectionStatus;
+    private string? publicResult;
+    private string? protectedResult;
+    private string? adminResult;
+    private string? accessToken;
+
+    private async Task TestConnection()
+    {
+        connectionStatus = await ApiService.TestConnectionAsync();
+    }
+
+    private async Task CallPublicEndpoint()
+    {
+        publicResult = await ApiService.GetRawAsync("/api/values");
+    }
+
+    private async Task CallProtectedEndpoint()
+    {
+        protectedResult = await ApiService.GetRawAsync("/api/values/protected");
+    }
+
+    private async Task CallUserProfile()
+    {
+        protectedResult = await ApiService.GetRawAsync("/api/user/profile");
+    }
+
+    private async Task CallUserData()
+    {
+        protectedResult = await ApiService.GetRawAsync("/api/user/user-data");
+    }
+
+    private async Task CallAdminEndpoint()
+    {
+        adminResult = await ApiService.GetRawAsync("/api/values/admin-only");
+    }
+
+    private async Task CallAdminUserEndpoint()
+    {
+        adminResult = await ApiService.GetRawAsync("/api/user/admin-only");
+    }
+
+    private async Task ShowAccessToken()
+    {
+        accessToken = await AuthService.GetAccessTokenAsync();
+    }
+}
