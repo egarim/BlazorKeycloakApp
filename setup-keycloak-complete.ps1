@@ -1,10 +1,15 @@
 # Complete Keycloak Setup Script for Blazor Server + C# REST API
 # This script creates a realm, configures clients, and handles all redirect URI configurations
+# 
+# Environment Variables (optional):
+# - KEYCLOAK_URL: Keycloak server URL (default: http://localhost:8080)
+# - KEYCLOAK_ADMIN_USER: Admin username (default: admin)
+# - KEYCLOAK_ADMIN_PASSWORD: Admin password (default: admin)
 
 param(
-    [string]$KeycloakUrl = "http://localhost:8080",
-    [string]$AdminUsername = "admin",
-    [string]$AdminPassword = "JoseManuel16",
+    [string]$KeycloakUrl = $(if ($env:KEYCLOAK_URL) { $env:KEYCLOAK_URL } else { "http://localhost:8080" }),
+    [string]$AdminUsername = $(if ($env:KEYCLOAK_ADMIN_USER) { $env:KEYCLOAK_ADMIN_USER } else { "admin" }),
+    [string]$AdminPassword = $(if ($env:KEYCLOAK_ADMIN_PASSWORD) { $env:KEYCLOAK_ADMIN_PASSWORD } else { "admin" }),
     [string]$RealmName = "blazor-app",
     [string]$BlazorClientId = "blazor-server",
     [string]$ApiClientId = "blazor-api",

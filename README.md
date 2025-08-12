@@ -14,7 +14,11 @@ This repository contains a comprehensive Blazor solution demonstrating authentic
 ### Setup Steps
 
 1. **Start Keycloak** (if not already running)
-2. **Run the automated setup**:
+2. **(Optional) Set environment variables for secure credential management**:
+   ```powershell
+   $env:KEYCLOAK_ADMIN_PASSWORD = "your-admin-password"  # if different from 'admin'
+   ```
+3. **Run the automated setup**:
    ```powershell
    .\setup-keycloak-complete.ps1
    ```
@@ -77,6 +81,32 @@ Enhanced Swagger UI with JWT Bearer token support:
 | `setup-keycloak-complete.ps1` | **Complete automated setup** - Creates realm, clients, users, roles, and audience mappers |
 | `delete-realm.ps1` | **Clean slate** - Safely deletes realm for fresh start |
 | `setup-keycloak-complete.ps1 -UpdateOnly` | **Update existing** - Updates client configuration only |
+
+### 🌐 Environment Variables Support
+
+Both scripts support environment variables for secure credential management:
+
+```powershell
+# Set environment variables (optional)
+$env:KEYCLOAK_URL = "http://localhost:8080"
+$env:KEYCLOAK_ADMIN_USER = "admin"
+$env:KEYCLOAK_ADMIN_PASSWORD = "your-admin-password"
+
+# Run scripts - they will automatically use environment variables
+.\setup-keycloak-complete.ps1
+.\delete-realm.ps1
+```
+
+**Environment Variables:**
+- `KEYCLOAK_URL`: Keycloak server URL (default: http://localhost:8080)
+- `KEYCLOAK_ADMIN_USER`: Admin username (default: admin)
+- `KEYCLOAK_ADMIN_PASSWORD`: Admin password (default: admin)
+
+**Benefits:**
+- ✅ Keep sensitive credentials out of command line history
+- ✅ Better security for production environments
+- ✅ Easy integration with CI/CD pipelines
+- ✅ Backward compatible - parameters still work if environment variables not set
 
 ## About Keycloak
 
