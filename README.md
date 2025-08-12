@@ -84,6 +84,53 @@ The API implements JWT Bearer authentication to validate tokens issued by Keyclo
 - Extracts roles from `realm_access.roles` claim
 - Supports the same authorization policies as the Blazor Server app
 
+## Keycloak Setup Scripts
+
+### setup-keycloak-complete.ps1 (Recommended)
+
+This comprehensive PowerShell script automates the complete Keycloak configuration:
+
+**Features:**
+- **Full Setup**: Creates realm, clients, roles, and test users
+- **Update Mode**: Updates existing client configurations
+- **Manual Instructions**: Shows step-by-step manual configuration guide
+- **Error Handling**: Comprehensive error handling with troubleshooting tips
+- **Flexible Parameters**: Customizable URLs, credentials, and client names
+
+**Usage Examples:**
+```powershell
+# Full automated setup (recommended)
+.\setup-keycloak-complete.ps1
+
+# Update existing client configuration only
+.\setup-keycloak-complete.ps1 -UpdateOnly
+
+# Show manual configuration instructions
+.\setup-keycloak-complete.ps1 -ShowInstructions
+
+# Custom configuration
+.\setup-keycloak-complete.ps1 -KeycloakUrl "http://localhost:8080" -AdminUsername "admin" -AdminPassword "admin"
+```
+
+**What it does:**
+- Creates `blazor-app` realm with proper security settings
+- Configures `blazor-server` client (OpenID Connect, confidential)
+- Configures `blazor-api` client (JWT Bearer, resource server)
+- Sets up comprehensive redirect URIs for all authentication scenarios:
+  - `/signin-oidc` - OpenID Connect callback
+  - `/signout-callback-oidc` - Logout callback
+  - `/authentication/login-callback` - Additional login callback
+  - `/authentication/logout-callback` - Additional logout callback
+- Creates realm roles: `admin`, `user`, `manager`
+- Creates test user: `testuser` / `Test123!`
+- Configures PKCE (S256) for enhanced security
+- Sets proper token lifespans and session timeouts
+
+### Legacy Scripts (Deprecated)
+
+**setup-keycloak.ps1**: Original setup script - use `setup-keycloak-complete.ps1` instead
+**update-keycloak-client.ps1**: Manual instruction guide - integrated into complete script
+
 ## Project Structure
 
 ### BlazorServer Project
@@ -100,56 +147,72 @@ The API implements JWT Bearer authentication to validate tokens issued by Keyclo
 
 ### Prerequisites
 - .NET 9 SDK
+- PowerShell 7.0+
 - Keycloak instance running on `http://localhost:8080`
 
-### Keycloak Configuration
+### Quick Start (Automated Setup)
 
-You need to configure Keycloak with the following setup:
+1. **Start Keycloak** (ensure it's running on localhost:8080)
 
-1. **Create Realm**: `blazor-app`
-2. **Create Clients**:
-   - **blazor-server**: 
-     - Client Type: OpenID Connect
-     - Access Type: Confidential
-     - Valid Redirect URIs: `https://localhost:7001/*`
-     - Web Origins: `https://localhost:7001`
-   - **blazor-api**:
-     - Client Type: OpenID Connect
-     - Access Type: Bearer-only
+2. **Run the setup script:**
+   ```powershell
+   .\setup-keycloak-complete.ps1
+   ```
+   
+   The script will prompt for admin credentials if needed (default: admin/admin)
 
-3. **Create Roles**: `admin`, `user`
-4. **Create Test User**:
-   - Username: `testuser`
-   - Password: `Test123!`
-   - Assign appropriate roles
-
-### Running the Applications
-
-1. **Clone and navigate to the repository:**
-   ```bash
-   git clone <repository-url>
-   cd BlazorKeycloakApp
+3. **Update configuration** if the generated client secret differs:
+   ```json
+   // BlazorServer/appsettings.json
+   {
+     "Keycloak": {
+       "ClientSecret": "use-the-secret-from-script-output"
+     }
+   }
    ```
 
-2. **Update configuration** (if needed):
-   - Modify `BlazorServer/appsettings.json` with your Keycloak settings
-   - Modify `BlazorApi/appsettings.json` with your Keycloak settings
-
-3. **Run the API** (Terminal 1):
+4. **Run the applications:**
    ```bash
+   # Terminal 1 - API
    cd BlazorApi
    dotnet run
-   ```
-   API will be available at `https://localhost:7002`
-
-4. **Run the Blazor Server app** (Terminal 2):
-   ```bash
+   
+   # Terminal 2 - Blazor Server
    cd BlazorServer
    dotnet run
    ```
-   App will be available at `https://localhost:7001`
 
-### Test Credentials
+5. **Test the application:**
+   - Navigate to `https://localhost:7001`
+   - Click "Login with Keycloak"
+   - Use credentials: `testuser` / `Test123!`
+
+### Manual Setup (If Scripts Fail)
+
+If the automated script fails, you can configure Keycloak manually:
+
+```powershell
+.\setup-keycloak-complete.ps1 -ShowInstructions
+```
+
+This will display detailed step-by-step instructions for manual configuration.
+
+### Troubleshooting
+
+**Common Issues:**
+
+1. **Authentication Failed**: Run update script to fix redirect URIs:
+   ```powershell
+   .\setup-keycloak-complete.ps1 -UpdateOnly
+   ```
+
+2. **Token Validation Errors**: Verify API client configuration and realm authority URL
+
+3. **CORS Issues**: Ensure BlazorServer URL is in the API's allowed origins
+
+4. **Logout Redirect Issues**: The complete script configures all necessary logout redirect URIs
+
+## Test Credentials
 
 The application includes test credentials for development:
 - **Username**: `testuser`
@@ -163,6 +226,7 @@ The application includes test credentials for development:
 - **Session Management**: Proper login/logout flows with token cleanup
 - **API Integration**: Authenticated API calls from Blazor Server to Web API
 - **Error Handling**: Comprehensive authentication error handling and logging
+- **Automated Setup**: Complete PowerShell automation for Keycloak configuration
 
 ## Development Notes
 
@@ -171,3 +235,4 @@ The application includes test credentials for development:
 - Tokens are automatically stored and managed by the authentication middleware
 - Role claims are automatically transformed from Keycloak's realm roles
 - CORS is configured to allow requests from the Blazor Server app to the API
+- All necessary redirect URIs are pre-configured for seamless authentication flows
