@@ -4,6 +4,11 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <BlazorWebAssemblyLoadBootResource>false</BlazorWebAssemblyLoadBootResource>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <BlazorWebAssemblyEnableDebugging>false</BlazorWebAssemblyEnableDebugging>
   </PropertyGroup>
 
   <ItemGroup>

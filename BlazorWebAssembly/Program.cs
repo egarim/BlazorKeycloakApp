@@ -14,14 +14,19 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.
 // Add configuration for API base URL
 var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"] ?? "https://localhost:7002";
 
-// Configure OIDC authentication for Keycloak with explicit settings
-builder.Services.AddOidcAuthentication<RemoteAuthenticationState, RemoteUserAccount>(options =>
+// Configure OIDC authentication for Keycloak
+builder.Services.AddOidcAuthentication(options =>
 {
     var keycloakConfig = builder.Configuration.GetSection("Keycloak");
     
     options.ProviderOptions.Authority = keycloakConfig["Authority"];
     options.ProviderOptions.ClientId = keycloakConfig["ClientId"];
     options.ProviderOptions.ResponseType = "code";
+    
+    // Configure redirect URIs
+    var baseAddress = builder.HostEnvironment.BaseAddress;
+    options.ProviderOptions.RedirectUri = $"{baseAddress}authentication/login-callback";
+    options.ProviderOptions.PostLogoutRedirectUri = $"{baseAddress}authentication/logout-callback";
     
     // Configure scopes
     var scopes = keycloakConfig.GetSection("Scopes").Get<string[]>() ?? new[] { "openid", "profile", "email" };
@@ -31,18 +36,12 @@ builder.Services.AddOidcAuthentication<RemoteAuthenticationState, RemoteUserAcco
         options.ProviderOptions.DefaultScopes.Add(scope);
     }
     
-    // Map claims
+    // Map claims for Keycloak compatibility
     options.UserOptions.NameClaim = "preferred_username";
     options.UserOptions.RoleClaim = "roles";
     
-    // Configure post-logout redirect
-    options.ProviderOptions.PostLogoutRedirectUri = builder.HostEnvironment.BaseAddress;
-    
     // Configure additional parameters for Keycloak compatibility
     options.ProviderOptions.AdditionalProviderParameters.Add("response_mode", "query");
-    
-    // Configure for public client (no client secret)
-    options.ProviderOptions.ClientId = keycloakConfig["ClientId"];
 });
 
 // Register custom services
@@ -55,6 +54,13 @@ builder.Services.AddHttpClient("API", client =>
 {
     client.BaseAddress = new Uri(apiBaseUrl);
 })
-.AddHttpMessageHandler<AuthorizationMessageHandler>();
+.AddHttpMessageHandler(sp =>
+{
+    var handler = sp.GetRequiredService<AuthorizationMessageHandler>()
+        .ConfigureHandler(
+            authorizedUrls: new[] { apiBaseUrl },
+            scopes: new[] { "openid", "profile", "email" });
+    return handler;
+});
 
 await builder.Build().RunAsync();
