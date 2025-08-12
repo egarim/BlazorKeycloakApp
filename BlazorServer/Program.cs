@@ -36,6 +36,10 @@ builder.Services.AddAuthentication(options =>
     // Set explicit callback paths
     options.CallbackPath = "/signin-oidc";
     options.SignedOutCallbackPath = "/signout-callback-oidc";
+    options.RemoteSignOutPath = "/signout-oidc";
+    
+    // Configure logout redirect
+    options.SignedOutRedirectUri = "https://localhost:7001/";
     
     // Enable PKCE (required by Keycloak setup)
     options.UsePkce = true;
