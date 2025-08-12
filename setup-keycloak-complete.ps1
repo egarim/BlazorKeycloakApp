@@ -1,10 +1,13 @@
-# Complete Keycloak Setup Script for Blazor Server + C# REST API
+# Complete Keycloak Setup Script for Blazor Server + Blazor WebAssembly + C# REST API
 # This script creates a realm, configures clients, and handles all redirect URI configurations
 # 
 # Environment Variables (optional):
 # - KEYCLOAK_URL: Keycloak server URL (default: http://localhost:8080)
 # - KEYCLOAK_ADMIN_USER: Admin username (default: admin)
 # - KEYCLOAK_ADMIN_PASSWORD: Admin password (default: admin)
+#
+# Parameters:
+# - RecreateWasmClient: Force recreation of the WebAssembly client if it exists
 
 param(
     [string]$KeycloakUrl = $(if ($env:KEYCLOAK_URL) { $env:KEYCLOAK_URL } else { "http://localhost:8080" }),
@@ -12,11 +15,14 @@ param(
     [string]$AdminPassword = $(if ($env:KEYCLOAK_ADMIN_PASSWORD) { $env:KEYCLOAK_ADMIN_PASSWORD } else { "admin" }),
     [string]$RealmName = "blazor-app",
     [string]$BlazorClientId = "blazor-server",
+    [string]$BlazorWasmClientId = "blazor-wasm",
     [string]$ApiClientId = "blazor-api",
     [string]$BlazorBaseUrl = "https://localhost:7001",
+    [string]$BlazorWasmBaseUrl = "https://localhost:7003",
     [string]$ApiBaseUrl = "https://localhost:7049",
     [switch]$UpdateOnly = $false,
-    [switch]$ShowInstructions = $false
+    [switch]$ShowInstructions = $false,
+    [switch]$RecreateWasmClient = $false
 )
 
 # Function to get admin access token
@@ -231,6 +237,103 @@ function New-ApiClient {
     }
 }
 
+# Function to delete a client (if needed for cleanup)
+function Remove-KeycloakClient {
+    param($RealmName, $ClientId, $KeycloakUrl, $Token)
+    
+    try {
+        # Get client UUID first
+        $clients = Invoke-KeycloakApi -Uri "$KeycloakUrl/admin/realms/$RealmName/clients?clientId=$ClientId" -Token $Token
+        if ($clients.Count -gt 0) {
+            $clientUuid = $clients[0].id
+            Invoke-KeycloakApi -Uri "$KeycloakUrl/admin/realms/$RealmName/clients/$clientUuid" -Method Delete -Token $Token
+            Write-Host "Client '$ClientId' deleted successfully" -ForegroundColor Green
+            return $true
+        }
+        else {
+            Write-Host "Client '$ClientId' not found" -ForegroundColor Yellow
+            return $false
+        }
+    }
+    catch {
+        Write-Warning "Failed to delete client '$ClientId': $($_.Exception.Message)"
+        return $false
+    }
+}
+
+# Function to create Blazor WebAssembly client
+function New-BlazorWasmClient {
+    param($RealmName, $ClientId, $BaseUrl, $KeycloakUrl, $Token)
+    
+    $redirectUris = @(
+        "$BaseUrl/authentication/login-callback",
+        "https://localhost:7003/authentication/login-callback"
+    )
+    
+    $postLogoutRedirectUris = @(
+        "$BaseUrl/authentication/logout-callback", 
+        "https://localhost:7003/authentication/logout-callback"
+    )
+    
+    $client = @{
+        clientId = $ClientId
+        name = "Blazor WebAssembly Application"
+        description = "OpenID Connect client for Blazor WebAssembly"
+        enabled = $true
+        # Public clients don't have client authenticator type or secret
+        redirectUris = $redirectUris
+        webOrigins = @("$BaseUrl", "https://localhost:7003")
+        protocol = "openid-connect"
+        publicClient = $true  # WebAssembly is a public client
+        frontchannelLogout = $true
+        attributes = @{
+            "pkce.code.challenge.method" = "S256"
+            "oauth2.device.authorization.grant.enabled" = "false"
+            "oidc.ciba.grant.enabled" = "false"
+        }
+        standardFlowEnabled = $true
+        implicitFlowEnabled = $false
+        directAccessGrantsEnabled = $false
+        serviceAccountsEnabled = $false
+        fullScopeAllowed = $false
+        # Default client scopes
+        defaultClientScopes = @("web-origins", "acr", "profile", "roles", "email")
+        optionalClientScopes = @("address", "phone", "offline_access", "microprofile-jwt")
+    }
+    
+    try {
+        $response = Invoke-KeycloakApi -Uri "$KeycloakUrl/admin/realms/$RealmName/clients" -Method Post -Body $client -Token $Token
+        Write-Host "Blazor WebAssembly client '$ClientId' created successfully" -ForegroundColor Green
+        
+        # Get the client UUID for further configuration
+        $clients = Invoke-KeycloakApi -Uri "$KeycloakUrl/admin/realms/$RealmName/clients?clientId=$ClientId" -Token $Token
+        $clientUuid = $clients[0].id
+        
+        # Add audience mapper for WebAssembly client
+        Add-AudienceMapper -RealmName $RealmName -ClientUuid $clientUuid -KeycloakUrl $KeycloakUrl -Token $Token
+        
+        return $clientUuid
+    }
+    catch {
+        if ($_.Exception.Message -like "*409*") {
+            Write-Host "Blazor WebAssembly client '$ClientId' already exists" -ForegroundColor Yellow
+            # Get existing client UUID
+            try {
+                $clients = Invoke-KeycloakApi -Uri "$KeycloakUrl/admin/realms/$RealmName/clients?clientId=$ClientId" -Token $Token
+                return $clients[0].id
+            }
+            catch {
+                Write-Warning "Could not retrieve existing WebAssembly client UUID"
+                return $null
+            }
+        }
+        else {
+            Write-Error "Failed to create Blazor WebAssembly client: $($_.Exception.Message)"
+            return $null
+        }
+    }
+}
+
 # Function to add audience mapper
 function Add-AudienceMapper {
     param($RealmName, $ClientUuid, $KeycloakUrl, $Token)
@@ -364,7 +467,8 @@ if ($ShowInstructions) {
 
 Write-Host "Connecting to Keycloak at: $KeycloakUrl" -ForegroundColor Yellow
 Write-Host "Realm: $RealmName" -ForegroundColor Gray
-Write-Host "Blazor Client: $BlazorClientId" -ForegroundColor Gray
+Write-Host "Blazor Server Client: $BlazorClientId" -ForegroundColor Gray
+Write-Host "Blazor WebAssembly Client: $BlazorWasmClientId" -ForegroundColor Gray
 Write-Host "API Client: $ApiClientId" -ForegroundColor Gray
 Write-Host ""
 
@@ -391,6 +495,13 @@ if (-not $UpdateOnly) {
 Write-Host "Creating Blazor Server client..." -ForegroundColor Yellow
 $blazorClientUuid = New-BlazorClient -RealmName $RealmName -ClientId $BlazorClientId -BaseUrl $BlazorBaseUrl -KeycloakUrl $KeycloakUrl -Token $adminToken
 
+Write-Host "Creating Blazor WebAssembly client..." -ForegroundColor Yellow
+if ($RecreateWasmClient) {
+    Write-Host "RecreateWasmClient flag set - removing existing WebAssembly client first..." -ForegroundColor Yellow
+    Remove-KeycloakClient -RealmName $RealmName -ClientId $BlazorWasmClientId -KeycloakUrl $KeycloakUrl -Token $adminToken
+}
+$blazorWasmClientUuid = New-BlazorWasmClient -RealmName $RealmName -ClientId $BlazorWasmClientId -BaseUrl $BlazorWasmBaseUrl -KeycloakUrl $KeycloakUrl -Token $adminToken
+
 Write-Host "Creating API client..." -ForegroundColor Yellow
 $apiClientCreated = New-ApiClient -RealmName $RealmName -ClientId $ApiClientId -BaseUrl $ApiBaseUrl -KeycloakUrl $KeycloakUrl -Token $adminToken
 
@@ -407,7 +518,8 @@ Write-Host "Configuration Summary:" -ForegroundColor Cyan
 Write-Host "=====================" -ForegroundColor Cyan
 Write-Host "Keycloak URL: $KeycloakUrl" -ForegroundColor Gray
 Write-Host "Realm: $RealmName" -ForegroundColor Gray
-Write-Host "Blazor Client ID: $BlazorClientId" -ForegroundColor Gray
+Write-Host "Blazor Server Client ID: $BlazorClientId" -ForegroundColor Gray
+Write-Host "Blazor WebAssembly Client ID: $BlazorWasmClientId" -ForegroundColor Gray
 Write-Host "API Client ID: $ApiClientId" -ForegroundColor Gray
 Write-Host "Test User: testuser / Test123!" -ForegroundColor Gray
 Write-Host ""
@@ -438,11 +550,15 @@ Write-Host ""
 Write-Host "   Terminal 2 - Blazor Server:" -ForegroundColor Gray
 Write-Host "   cd BlazorServer && dotnet run" -ForegroundColor Gray
 Write-Host ""
+Write-Host "   Terminal 3 - Blazor WebAssembly:" -ForegroundColor Gray
+Write-Host "   cd BlazorWebAssembly && dotnet run" -ForegroundColor Gray
+Write-Host ""
 Write-Host "4. TEST AUTHENTICATION:" -ForegroundColor Yellow
-Write-Host "   - Navigate to: $BlazorBaseUrl" -ForegroundColor Gray
-Write-Host "   - Click 'Login with Keycloak'" -ForegroundColor Gray
+Write-Host "   Blazor Server: Navigate to: $BlazorBaseUrl" -ForegroundColor Gray
+Write-Host "   Blazor WebAssembly: Navigate to: $BlazorWasmBaseUrl" -ForegroundColor Gray
+Write-Host "   - Click 'Login' or 'Log in'" -ForegroundColor Gray
 Write-Host "   - Use credentials: testuser / Test123!" -ForegroundColor Gray
-Write-Host "   - Test API calls on the /apitest page" -ForegroundColor Gray
+Write-Host "   - Test API calls on the /api-test page" -ForegroundColor Gray
 Write-Host ""
 Write-Host "Important: Audience mapper configured for JWT tokens" -ForegroundColor Green
 Write-Host "This fixes the 'aud' claim issue for API authentication" -ForegroundColor Green
