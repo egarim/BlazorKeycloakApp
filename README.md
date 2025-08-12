@@ -18,7 +18,23 @@ This repository contains a comprehensive Blazor solution demonstrating authentic
    ```powershell
    .\setup-keycloak-complete.ps1
    ```
-3. **Start the applications**:
+3. **⚠️ IMPORTANT: Configure Client Secret**:
+   - The setup script will show instructions to get the client secret from Keycloak
+   - Open: http://localhost:8080/admin
+   - Navigate to: Realms > blazor-app > Clients > blazor-server > Credentials tab
+   - Copy the "Client secret" value
+   - Update `BlazorServer/appsettings.json`:
+   ```json
+   {
+     "Keycloak": {
+       "Authority": "http://localhost:8080/realms/blazor-app",
+       "ClientId": "blazor-server",
+       "ClientSecret": "YOUR_ACTUAL_CLIENT_SECRET_HERE",
+       "RequireHttpsMetadata": false
+     }
+   }
+   ```
+4. **Start the applications**:
    ```powershell
    # Terminal 1 - API
    cd BlazorApi
@@ -28,11 +44,11 @@ This repository contains a comprehensive Blazor solution demonstrating authentic
    cd BlazorServer
    dotnet run
    ```
-4. **Test the application**:
+5. **Test the application**:
    - Navigate to: https://localhost:7001
    - Login with: `testuser / Test123!`
    - Test API endpoints at: https://localhost:7001/api-test
-   - Test with Swagger UI at: https://localhost:7002
+   - Test with Swagger UI at: https://localhost:7049/swagger
 
 ## 🔧 Features & Tools
 
@@ -217,14 +233,25 @@ This comprehensive PowerShell script automates the complete Keycloak configurati
    .\setup-keycloak-complete.ps1
    ```
    
-   The script will prompt for admin credentials if needed (default: admin/admin)
+   The script will create all necessary configurations but you must manually get the client secret.
 
-3. **Update configuration** if the generated client secret differs:
+3. **⚠️ CRITICAL: Get Client Secret and Update Configuration:**
+   
+   **Step 3a: Get the Client Secret**
+   - Open Keycloak Admin Console: http://localhost:8080/admin
+   - Navigate to: Realms > blazor-app > Clients > blazor-server
+   - Go to the "Credentials" tab
+   - Copy the "Client secret" value
+   
+   **Step 3b: Update appsettings.json**
    ```json
    // BlazorServer/appsettings.json
    {
      "Keycloak": {
-       "ClientSecret": "use-the-secret-from-script-output"
+       "Authority": "http://localhost:8080/realms/blazor-app",
+       "ClientId": "blazor-server",
+       "ClientSecret": "PASTE_YOUR_ACTUAL_CLIENT_SECRET_HERE",
+       "RequireHttpsMetadata": false
      }
    }
    ```
@@ -259,16 +286,26 @@ This will display detailed step-by-step instructions for manual configuration.
 
 **Common Issues:**
 
-1. **Authentication Failed**: Run update script to fix redirect URIs:
+1. **❌ "Unable to obtain configuration" / Authentication Errors**: 
+   **MOST COMMON ISSUE** - Missing or incorrect client secret:
+   ```powershell
+   # Solution: Get the client secret from Keycloak Admin Console
+   # 1. Open: http://localhost:8080/admin
+   # 2. Go to: Realms > blazor-app > Clients > blazor-server > Credentials
+   # 3. Copy the Client secret value
+   # 4. Update BlazorServer/appsettings.json with the correct ClientSecret
+   ```
+
+2. **Authentication Failed**: Run update script to fix redirect URIs:
    ```powershell
    .\setup-keycloak-complete.ps1 -UpdateOnly
    ```
 
-2. **Token Validation Errors**: Verify API client configuration and realm authority URL
+3. **Token Validation Errors**: Verify API client configuration and realm authority URL
 
-3. **CORS Issues**: Ensure BlazorServer URL is in the API's allowed origins
+4. **CORS Issues**: Ensure BlazorServer URL is in the API's allowed origins
 
-4. **Logout Redirect Issues**: The complete script configures all necessary logout redirect URIs
+5. **Logout Redirect Issues**: The complete script configures all necessary logout redirect URIs
 
 ## Test Credentials
 

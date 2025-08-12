@@ -406,38 +406,11 @@ Write-Host "Blazor Client ID: $BlazorClientId" -ForegroundColor Gray
 Write-Host "API Client ID: $ApiClientId" -ForegroundColor Gray
 Write-Host "Test User: testuser / Test123!" -ForegroundColor Gray
 Write-Host ""
-Write-Host "IMPORTANT: Manual Configuration Required" -ForegroundColor Red
-Write-Host "=========================================" -ForegroundColor Red
-Write-Host ""
-Write-Host "1. GET CLIENT SECRET from Keycloak Admin Console:" -ForegroundColor Yellow
-Write-Host "   - Open: $KeycloakUrl/admin" -ForegroundColor Gray
-Write-Host "   - Navigate to: Realms > $RealmName > Clients > $BlazorClientId" -ForegroundColor Gray
-Write-Host "   - Go to 'Credentials' tab" -ForegroundColor Gray
-Write-Host "   - Copy the 'Client secret' value" -ForegroundColor Gray
-Write-Host ""
-Write-Host "2. UPDATE APPSETTINGS.JSON:" -ForegroundColor Yellow
-Write-Host "   File: BlazorServer/appsettings.json" -ForegroundColor Gray
-Write-Host "   Update the ClientSecret with the value from step 1:" -ForegroundColor Gray
-Write-Host ""
-Write-Host '   "Keycloak": {' -ForegroundColor Cyan
-Write-Host '     "Authority": "http://localhost:8080/realms/blazor-app",' -ForegroundColor Cyan
-Write-Host '     "ClientId": "blazor-server",' -ForegroundColor Cyan
-Write-Host '     "ClientSecret": "YOUR_ACTUAL_CLIENT_SECRET_HERE",' -ForegroundColor Red
-Write-Host '     "RequireHttpsMetadata": false' -ForegroundColor Cyan
-Write-Host '   }' -ForegroundColor Cyan
-Write-Host ""
-Write-Host "3. RUN THE APPLICATIONS:" -ForegroundColor Yellow
-Write-Host "   Terminal 1 - API:" -ForegroundColor Gray
-Write-Host "   cd BlazorApi && dotnet run" -ForegroundColor Gray
-Write-Host ""
-Write-Host "   Terminal 2 - Blazor Server:" -ForegroundColor Gray
-Write-Host "   cd BlazorServer && dotnet run" -ForegroundColor Gray
-Write-Host ""
-Write-Host "4. TEST AUTHENTICATION:" -ForegroundColor Yellow
-Write-Host "   - Navigate to: $BlazorBaseUrl" -ForegroundColor Gray
-Write-Host "   - Click 'Login with Keycloak'" -ForegroundColor Gray
-Write-Host "   - Use credentials: testuser / Test123!" -ForegroundColor Gray
-Write-Host "   - Test API calls on the /apitest page" -ForegroundColor Gray
+Write-Host "Next Steps:" -ForegroundColor Yellow
+Write-Host "1. Update appsettings.json with the above configuration" -ForegroundColor Gray
+Write-Host "2. Run the Blazor Server app: dotnet run" -ForegroundColor Gray
+Write-Host "3. Run the API: dotnet run" -ForegroundColor Gray
+Write-Host "4. Test authentication at: $BlazorBaseUrl" -ForegroundColor Gray
 Write-Host ""
 Write-Host "Important: Audience mapper configured for JWT tokens" -ForegroundColor Green
 Write-Host "This fixes the 'aud' claim issue for API authentication" -ForegroundColor Green
