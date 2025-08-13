@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authentication;
 using System.Security.Claims;
+using BlazorServer.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -153,6 +154,8 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("RequireUser", policy =>
         policy.RequireRole("user", "admin"));
 });
+
+builder.Services.AddScoped<WeatherForecastService>();
 
 // Register services
 builder.Services.AddHttpContextAccessor();
