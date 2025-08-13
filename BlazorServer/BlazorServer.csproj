@@ -7,7 +7,7 @@
     <IsPackable>true</IsPackable>
     <PackageType>Template</PackageType>
     <PackageId>KeyClokBlazorServer</PackageId>
-    <PackageVersion>2.0.0</PackageVersion>
+    <PackageVersion>2.0.1</PackageVersion>
     <Title>KeyCloak Blazor Server Template</Title>
     <Description>A Blazor Server template with KeyCloak OIDC authentication, comprehensive API integration, and authentication testing capabilities.</Description>
     <PackageTags>dotnet-new;templates;blazor;server;keycloak;oidc;authentication</PackageTags>
@@ -24,8 +24,27 @@
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.13.1" />
   </ItemGroup>
 
+  <!-- Template content packaging -->
   <ItemGroup>
-    <Content Include="**/*" Exclude="bin/**;obj/**;**/*.user;**/.vs/**;**/.git/**;*.nupkg" />
+    <!-- Standard content files -->
+    <None Include="**/*.json" Pack="true" PackagePath="content/" Exclude="bin/**;obj/**;**/*.user;**/.vs/**;**/.git/**;*.nupkg" />
+    <None Include="**/*.cs" Pack="true" PackagePath="content/" Exclude="bin/**;obj/**;**/*.user;**/.vs/**;**/.git/**;*.nupkg;**/*.ide.g.cs" />
+    <None Include="**/*.md" Pack="true" PackagePath="content/" Exclude="bin/**;obj/**;**/*.user;**/.vs/**;**/.git/**;*.nupkg" />
+    <None Include="**/*.css" Pack="true" PackagePath="content/" Exclude="bin/**;obj/**;**/*.user;**/.vs/**;**/.git/**;*.nupkg" />
+    <None Include="**/*.js" Pack="true" PackagePath="content/" Exclude="bin/**;obj/**;**/*.user;**/.vs/**;**/.git/**;*.nupkg" />
+    <None Include="**/*.png" Pack="true" PackagePath="content/" Exclude="bin/**;obj/**;**/*.user;**/.vs/**;**/.git/**;*.nupkg" />
+    <None Include="**/*.ico" Pack="true" PackagePath="content/" Exclude="bin/**;obj/**;**/*.user;**/.vs/**;**/.git/**;*.nupkg" />
+    <None Include="**/*.svg" Pack="true" PackagePath="content/" Exclude="bin/**;obj/**;**/*.user;**/.vs/**;**/.git/**;*.nupkg" />
+    <None Include="**/*.ps1" Pack="true" PackagePath="content/" Exclude="bin/**;obj/**;**/*.user;**/.vs/**;**/.git/**;*.nupkg" />
+    <None Include="**/*.tmp" Pack="true" PackagePath="content/" Exclude="bin/**;obj/**;**/*.user;**/.vs/**;**/.git/**;*.nupkg" />
+    <None Include="**/*.backup" Pack="true" PackagePath="content/" Exclude="bin/**;obj/**;**/*.user;**/.vs/**;**/.git/**;*.nupkg" />
+    
+    <!-- Explicitly include Razor files as None items with Pack=true -->
+    <None Include="**/*.razor" Pack="true" PackagePath="content/" Exclude="bin/**;obj/**;**/*.user;**/.vs/**;**/.git/**;*.nupkg" />
+    <None Include="**/*.cshtml" Pack="true" PackagePath="content/" Exclude="bin/**;obj/**;**/*.user;**/.vs/**;**/.git/**;*.nupkg" />
+    
+    <!-- Include template configuration -->
+    <None Include=".template.config\**\*" Pack="true" PackagePath="content\.template.config/" />
   </ItemGroup>
 
 </Project>

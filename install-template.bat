@@ -4,14 +4,14 @@ echo  KeyCloak Templates Installer
 echo ================================================
 echo.
 
-if not exist "template-packages\KeyClokRestApi.2.0.0.nupkg" (
+if not exist "template-packages\KeyClokRestApi.2.0.1.nupkg" (
     echo ERROR: API Template package not found!
     echo Please run pack.bat first to create the template packages.
     pause
     exit /b 1
 )
 
-if not exist "template-packages\KeyClokBlazorServer.2.0.0.nupkg" (
+if not exist "template-packages\KeyClokBlazorServer.2.0.1.nupkg" (
     echo ERROR: Blazor Server Template package not found!
     echo Please run pack.bat first to create the template packages.
     pause
@@ -19,7 +19,7 @@ if not exist "template-packages\KeyClokBlazorServer.2.0.0.nupkg" (
 )
 
 echo Installing KeyCloak REST API template...
-dotnet new install "template-packages\KeyClokRestApi.2.0.0.nupkg"
+dotnet new install "template-packages\KeyClokRestApi.2.0.1.nupkg"
 
 if %ERRORLEVEL% neq 0 (
     echo.
@@ -32,7 +32,7 @@ echo ? SUCCESS: API Template installed successfully!
 echo.
 
 echo Installing KeyCloak Blazor Server template...
-dotnet new install "template-packages\KeyClokBlazorServer.2.0.0.nupkg"
+dotnet new install "template-packages\KeyClokBlazorServer.2.0.1.nupkg"
 
 if %ERRORLEVEL% neq 0 (
     echo.

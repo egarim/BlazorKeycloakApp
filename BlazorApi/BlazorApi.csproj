@@ -7,7 +7,7 @@
     <IsPackable>true</IsPackable>
     <PackageType>Template</PackageType>
     <PackageId>KeyClokRestApi</PackageId>
-    <PackageVersion>2.0.0</PackageVersion>
+    <PackageVersion>2.0.1</PackageVersion>
     <Title>KeyCloak REST API Template</Title>
     <Description>A REST API template with KeyCloak JWT authentication, Swagger integration, and comprehensive authentication testing endpoints.</Description>
     <PackageTags>dotnet-new;templates;api;keycloak;jwt;authentication;swagger</PackageTags>
@@ -25,8 +25,24 @@
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.13.1" />
   </ItemGroup>
 
+  <!-- Template content packaging -->
   <ItemGroup>
-    <Content Include="**/*" Exclude="bin/**;obj/**;**/*.user;**/.vs/**;**/.git/**;*.nupkg" />
+    <!-- Standard content files -->
+    <None Include="**/*.json" Pack="true" PackagePath="content/" Exclude="bin/**;obj/**;**/*.user;**/.vs/**;**/.git/**;*.nupkg" />
+    <None Include="**/*.cs" Pack="true" PackagePath="content/" Exclude="bin/**;obj/**;**/*.user;**/.vs/**;**/.git/**;*.nupkg;**/*.ide.g.cs" />
+    <None Include="**/*.md" Pack="true" PackagePath="content/" Exclude="bin/**;obj/**;**/*.user;**/.vs/**;**/.git/**;*.nupkg" />
+    <None Include="**/*.css" Pack="true" PackagePath="content/" Exclude="bin/**;obj/**;**/*.user;**/.vs/**;**/.git/**;*.nupkg" />
+    <None Include="**/*.js" Pack="true" PackagePath="content/" Exclude="bin/**;obj/**;**/*.user;**/.vs/**;**/.git/**;*.nupkg" />
+    <None Include="**/*.png" Pack="true" PackagePath="content/" Exclude="bin/**;obj/**;**/*.user;**/.vs/**;**/.git/**;*.nupkg" />
+    <None Include="**/*.ico" Pack="true" PackagePath="content/" Exclude="bin/**;obj/**;**/*.user;**/.vs/**;**/.git/**;*.nupkg" />
+    <None Include="**/*.svg" Pack="true" PackagePath="content/" Exclude="bin/**;obj/**;**/*.user;**/.vs/**;**/.git/**;*.nupkg" />
+    <None Include="**/*.ps1" Pack="true" PackagePath="content/" Exclude="bin/**;obj/**;**/*.user;**/.vs/**;**/.git/**;*.nupkg" />
+    <None Include="**/*.tmp" Pack="true" PackagePath="content/" Exclude="bin/**;obj/**;**/*.user;**/.vs/**;**/.git/**;*.nupkg" />
+    <None Include="**/*.backup" Pack="true" PackagePath="content/" Exclude="bin/**;obj/**;**/*.user;**/.vs/**;**/.git/**;*.nupkg" />
+    <None Include="**/*.http" Pack="true" PackagePath="content/" Exclude="bin/**;obj/**;**/*.user;**/.vs/**;**/.git/**;*.nupkg" />
+    
+    <!-- Include template configuration -->
+    <None Include=".template.config\**\*" Pack="true" PackagePath="content\.template.config/" />
   </ItemGroup>
 
 </Project>
