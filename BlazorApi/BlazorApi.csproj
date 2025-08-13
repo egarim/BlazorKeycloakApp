@@ -4,6 +4,22 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>BlazorApi</RootNamespace>
+	<IsPackable>true</IsPackable>
+    <!-- Template Package Properties -->
+    <PackageType>Template</PackageType>
+    <PackageId>RestApiWithKeyClock</PackageId>
+    <PackageVersion>1.0.0</PackageVersion>
+    <Title>REST API with Keycloak JWT Authentication Template</Title>
+    <Description>A REST API project template with JWT Bearer authentication configured for Keycloak, including Swagger UI and comprehensive authentication endpoints</Description>
+    <Authors>Your Name</Authors>
+    <PackageTags>dotnet-new;templates;api;rest;keycloak;jwt;authentication;swagger</PackageTags>
+    <IncludeContentInPack>true</IncludeContentInPack>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <ContentTargetFolders>content</ContentTargetFolders>
+    <NoWarn>$(NoWarn);NU5128</NoWarn>
+    <NoDefaultExcludes>true</NoDefaultExcludes>
+    <EnableDefaultContentItems>false</EnableDefaultContentItems>
   </PropertyGroup>
 
   <ItemGroup>
@@ -11,6 +27,10 @@
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.8" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.3" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.13.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="**\*" Exclude="bin\**;obj\**;**\*.user;**\*.lock.json" />
   </ItemGroup>
 
 </Project>

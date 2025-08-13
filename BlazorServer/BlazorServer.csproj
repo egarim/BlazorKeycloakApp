@@ -4,12 +4,38 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>BlazorServer</RootNamespace>
+  </PropertyGroup>
+
+  <!-- Template Package Properties (only when packing) -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <IsPackable>true</IsPackable>
+    <PackageType>Template</PackageType>
+    <PackageId>BlazorServerWithKeyClock</PackageId>
+    <PackageVersion>1.0.0</PackageVersion>
+    <Title>Blazor Server with Keycloak OIDC Authentication Template</Title>
+    <Description>A Blazor Server project template with OpenID Connect authentication configured for Keycloak, including comprehensive API integration and authentication diagnostics</Description>
+    <Authors>Your Name</Authors>
+    <PackageTags>dotnet-new;templates;blazor;server;keycloak;oidc;authentication;openidconnect</PackageTags>
+    <IncludeContentInPack>true</IncludeContentInPack>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <ContentTargetFolders>content</ContentTargetFolders>
+    <NoWarn>$(NoWarn);NU5128</NoWarn>
+    <NoDefaultExcludes>true</NoDefaultExcludes>
+    <EnableDefaultContentItems>false</EnableDefaultContentItems>
+    <!-- Disable scoped CSS during template packaging to avoid conflicts -->
+    <ScopedCssEnabled>false</ScopedCssEnabled>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Cookies" Version="2.3.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="9.0.8" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.13.1" />
+  </ItemGroup>
+
+  <!-- Include all files for template packaging -->
+  <ItemGroup Condition="'$(Configuration)' == 'Release' AND '$(PackageType)' == 'Template'">
+    <Content Include="**\*" Exclude="bin\**;obj\**;**\*.user;**\*.lock.json" />
   </ItemGroup>
 
 </Project>

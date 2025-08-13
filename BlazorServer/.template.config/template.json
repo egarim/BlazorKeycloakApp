@@ -1,0 +1,92 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Your Name",
+  "classifications": [ "Web", "Blazor", "Server", "OIDC", "Keycloak", "Authentication" ],
+  "identity": "BlazorServerWithKeyClock.Template",
+  "name": "Blazor Server with Keycloak OIDC Authentication",
+  "shortName": "blazorserverwithkeycloak",
+  "description": "A Blazor Server project template with OpenID Connect authentication configured for Keycloak, including comprehensive API integration and authentication diagnostics",
+  "sourceName": "BlazorServer",
+  "preferNameDirectory": true,
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "symbols": {
+    "Framework": {
+      "type": "parameter",
+      "description": "The target framework for the project",
+      "datatype": "choice",
+      "choices": [
+        {
+          "choice": "net9.0",
+          "description": ".NET 9.0"
+        },
+        {
+          "choice": "net8.0", 
+          "description": ".NET 8.0"
+        }
+      ],
+      "defaultValue": "net9.0",
+      "replaces": "net9.0"
+    },
+    "AuthorityUrl": {
+      "type": "parameter",
+      "description": "Keycloak authority URL",
+      "defaultValue": "http://localhost:8080/realms/your-realm",
+      "replaces": "http://localhost:8080/realms/blazor-app"
+    },
+    "ClientId": {
+      "type": "parameter",
+      "description": "Keycloak client ID",
+      "defaultValue": "your-blazor-client",
+      "replaces": "blazor-server"
+    },
+    "ClientSecret": {
+      "type": "parameter",
+      "description": "Keycloak client secret placeholder",
+      "defaultValue": "your-client-secret-here",
+      "replaces": "your-blazor-client-secret-here"
+    },
+    "ApiBaseUrl": {
+      "type": "parameter",
+      "description": "API base URL for backend integration",
+      "defaultValue": "https://localhost:7002",
+      "replaces": "https://localhost:7002"
+    },
+    "skipRestore": {
+      "type": "parameter",
+      "datatype": "bool",
+      "description": "If specified, skips the automatic restore of the project on create.",
+      "defaultValue": "false"
+    }
+  },
+  "sources": [
+    {
+      "modifiers": [
+        {
+          "exclude": [
+            "**/[Bb]in/**",
+            "**/[Oo]bj/**",
+            ".template.config/**/*",
+            "**/*.filelist",
+            "**/*.user",
+            "**/*.lock.json",
+            "*.nupkg"
+          ]
+        }
+      ]
+    }
+  ],
+  "postActions": [
+    {
+      "condition": "(!skipRestore)",
+      "description": "Restore NuGet packages required by this project.",
+      "manualInstructions": [
+        { "text": "Run 'dotnet restore'" }
+      ],
+      "actionId": "210D431B-A78B-4D2F-B762-4ED3E3EA9025",
+      "continueOnError": true
+    }
+  ]
+}

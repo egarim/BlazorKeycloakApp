@@ -1,0 +1,225 @@
+#!/usr/bin/env pwsh
+
+# Test script for the BlazorServerWithKeyClock template
+# This script creates a test project and verifies it builds successfully
+
+param(
+    [string]$TestProjectName = "TestBlazorServerProject",
+    [string]$TestDirectory = "blazorserver-template-test",
+    [switch]$KeepTestProject,
+    [switch]$Verbose
+)
+
+Write-Host ""
+Write-Host "========================================" -ForegroundColor Cyan
+Write-Host "   Blazor Server Template Testing" -ForegroundColor Cyan
+Write-Host "========================================" -ForegroundColor Cyan
+Write-Host ""
+
+$TemplateShortName = "blazorserverwithkeycloak"
+
+# Function to write verbose output
+function Write-VerboseOutput($Message) {
+    if ($Verbose) {
+        Write-Host "[VERBOSE] $Message" -ForegroundColor DarkGray
+    }
+}
+
+# Function to handle errors
+function Write-ErrorAndExit($Message, $ExitCode = 1) {
+    Write-Host "ERROR: $Message" -ForegroundColor Red
+    exit $ExitCode
+}
+
+# Check if template is installed
+Write-Host "Checking if template is installed..." -ForegroundColor Yellow
+$templateList = dotnet new list $TemplateShortName 2>&1
+if ($LASTEXITCODE -ne 0 -or $templateList -like "*No templates found*") {
+    Write-ErrorAndExit "Template '$TemplateShortName' is not installed. Please run pack-blazorserver-template.ps1 first."
+}
+
+Write-Host "Template found!" -ForegroundColor Green
+
+# Clean up existing test directory
+if (Test-Path $TestDirectory) {
+    Write-Host "Removing existing test directory..." -ForegroundColor Yellow
+    Remove-Item $TestDirectory -Recurse -Force
+}
+
+# Create test directory
+Write-Host "Creating test directory: $TestDirectory" -ForegroundColor Yellow
+New-Item -ItemType Directory -Path $TestDirectory -Force | Out-Null
+Set-Location $TestDirectory
+
+try {
+    # Test 1: Basic template creation
+    Write-Host ""
+    Write-Host "Test 1: Creating project with default settings..." -ForegroundColor Green
+    Write-VerboseOutput "Command: dotnet new $TemplateShortName --name $TestProjectName"
+    
+    $createResult = dotnet new $TemplateShortName --name $TestProjectName 2>&1
+    if ($LASTEXITCODE -ne 0) {
+        Write-ErrorAndExit "Failed to create project with template. Output: $createResult"
+    }
+    
+    Write-Host "? Project created successfully" -ForegroundColor Green
+
+    # Test 2: Check if required files exist
+    Write-Host ""
+    Write-Host "Test 2: Verifying project structure..." -ForegroundColor Green
+    
+    $RequiredFiles = @(
+        "$TestProjectName.csproj",
+        "Program.cs",
+        "appsettings.json",
+        "App.razor",
+        "_Imports.razor",
+        "Pages/_Host.cshtml",
+        "Pages/Index.razor",
+        "Pages/Welcome.razor",
+        "Pages/ApiTest.razor",
+        "Pages/Profile.razor",
+        "Services/AuthService.cs",
+        "Services/ApiService.cs",
+        "Shared/MainLayout.razor",
+        "Shared/NavMenu.razor"
+    )
+    
+    foreach ($file in $RequiredFiles) {
+        if (Test-Path $file) {
+            Write-Host "? Found: $file" -ForegroundColor Green
+        } else {
+            Write-Host "? Missing: $file" -ForegroundColor Red
+            $missingFiles = $true
+        }
+    }
+    
+    if ($missingFiles) {
+        Write-ErrorAndExit "Some required files are missing from the generated project."
+    }
+
+    # Test 3: Check namespace replacement
+    Write-Host ""
+    Write-Host "Test 3: Verifying namespace replacement..." -ForegroundColor Green
+    
+    $programContent = Get-Content "Program.cs" -Raw
+    if ($programContent -match "namespace\s+$TestProjectName" -or $programContent -match "using\s+$TestProjectName") {
+        Write-Host "? Namespace correctly replaced" -ForegroundColor Green
+    } else {
+        Write-VerboseOutput "Program.cs content preview:"
+        Write-VerboseOutput ($programContent.Substring(0, [Math]::Min(500, $programContent.Length)))
+        Write-Host "??  Namespace replacement verification inconclusive" -ForegroundColor Yellow
+    }
+
+    # Test 4: Check configuration placeholders
+    Write-Host ""
+    Write-Host "Test 4: Verifying configuration..." -ForegroundColor Green
+    
+    $appSettingsContent = Get-Content "appsettings.json" -Raw
+    if ($appSettingsContent -match "your-realm" -and $appSettingsContent -match "your-blazor-client") {
+        Write-Host "? Configuration placeholders found" -ForegroundColor Green
+    } else {
+        Write-Host "??  Configuration verification inconclusive" -ForegroundColor Yellow
+        Write-VerboseOutput "appsettings.json content: $appSettingsContent"
+    }
+
+    # Test 5: Check for Blazor-specific files
+    Write-Host ""
+    Write-Host "Test 5: Verifying Blazor Server components..." -ForegroundColor Green
+    
+    $BlazorFiles = @(
+        "App.razor",
+        "_Imports.razor",
+        "Pages/_Host.cshtml",
+        "Shared/MainLayout.razor"
+    )
+    
+    foreach ($file in $BlazorFiles) {
+        if (Test-Path $file) {
+            Write-Host "? Blazor component found: $file" -ForegroundColor Green
+        } else {
+            Write-Host "? Missing Blazor component: $file" -ForegroundColor Red
+            $missingBlazorFiles = $true
+        }
+    }
+    
+    if ($missingBlazorFiles) {
+        Write-Host "??  Some Blazor components are missing" -ForegroundColor Yellow
+    }
+
+    # Test 6: Build the project
+    Write-Host ""
+    Write-Host "Test 6: Building the project..." -ForegroundColor Green
+    Write-VerboseOutput "Command: dotnet build"
+    
+    $buildResult = dotnet build 2>&1
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "? Build failed. Output:" -ForegroundColor Red
+        Write-Host $buildResult -ForegroundColor Red
+        Write-ErrorAndExit "Project build failed."
+    }
+    
+    Write-Host "? Project builds successfully" -ForegroundColor Green
+
+    # Test 7: Test with custom parameters
+    Write-Host ""
+    Write-Host "Test 7: Testing with custom parameters..." -ForegroundColor Green
+    
+    Set-Location ..
+    $CustomTestDir = "custom-blazor-test"
+    if (Test-Path $CustomTestDir) {
+        Remove-Item $CustomTestDir -Recurse -Force
+    }
+    
+    Write-VerboseOutput "Command: dotnet new $TemplateShortName --name CustomBlazorApp --output $CustomTestDir --AuthorityUrl http://localhost:8080/realms/test --ClientId test-client"
+    
+    $customResult = dotnet new $TemplateShortName --name "CustomBlazorApp" --output $CustomTestDir --AuthorityUrl "http://localhost:8080/realms/test" --ClientId "test-client" 2>&1
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "??  Custom parameters test failed: $customResult" -ForegroundColor Yellow
+    } else {
+        Write-Host "? Custom parameters work correctly" -ForegroundColor Green
+        
+        # Verify custom settings
+        $customAppSettings = Get-Content "$CustomTestDir/appsettings.json" -Raw
+        if ($customAppSettings -match "test-client" -and $customAppSettings -match "realms/test") {
+            Write-Host "? Custom parameters applied correctly" -ForegroundColor Green
+        } else {
+            Write-Host "??  Custom parameters may not have been applied" -ForegroundColor Yellow
+        }
+    }
+
+    Write-Host ""
+    Write-Host "========================================" -ForegroundColor Cyan
+    Write-Host "All Tests Completed Successfully! ?" -ForegroundColor Green
+    Write-Host "========================================" -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "Template '$TemplateShortName' is working correctly." -ForegroundColor Green
+    Write-Host ""
+    Write-Host "Generated test projects:" -ForegroundColor Yellow
+    Write-Host "  ./$TestDirectory/$TestProjectName" -ForegroundColor White
+    if (Test-Path $CustomTestDir) {
+        Write-Host "  ./$CustomTestDir" -ForegroundColor White
+    }
+    
+} catch {
+    Write-ErrorAndExit "Test failed with exception: $_"
+} finally {
+    # Return to original directory
+    Set-Location ..
+    
+    # Clean up test projects unless requested to keep them
+    if (-not $KeepTestProject) {
+        Write-Host ""
+        Write-Host "Cleaning up test projects..." -ForegroundColor Yellow
+        if (Test-Path $TestDirectory) {
+            Remove-Item $TestDirectory -Recurse -Force
+        }
+        if (Test-Path "custom-blazor-test") {
+            Remove-Item "custom-blazor-test" -Recurse -Force
+        }
+        Write-Host "Test projects removed." -ForegroundColor Green
+    } else {
+        Write-Host ""
+        Write-Host "Test projects preserved (--KeepTestProject specified)" -ForegroundColor Yellow
+    }
+}

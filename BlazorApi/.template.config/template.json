@@ -1,0 +1,86 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Your Name",
+  "classifications": [ "Web", "REST", "API", "JWT", "Keycloak", "Authentication" ],
+  "identity": "RestApiWithKeyClock.Template",
+  "name": "REST API with Keycloak JWT Authentication",
+  "shortName": "restapiwithkeycloak",
+  "description": "A REST API project template with JWT Bearer authentication configured for Keycloak, including Swagger UI and comprehensive authentication endpoints",
+  "sourceName": "BlazorApi",
+  "preferNameDirectory": true,
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "symbols": {
+    "Framework": {
+      "type": "parameter",
+      "description": "The target framework for the project",
+      "datatype": "choice",
+      "choices": [
+        {
+          "choice": "net9.0",
+          "description": ".NET 9.0"
+        },
+        {
+          "choice": "net8.0", 
+          "description": ".NET 8.0"
+        }
+      ],
+      "defaultValue": "net9.0",
+      "replaces": "net9.0"
+    },
+    "AuthorityUrl": {
+      "type": "parameter",
+      "description": "Keycloak authority URL",
+      "defaultValue": "http://localhost:8080/realms/your-realm",
+      "replaces": "http://localhost:8080/realms/blazor-app"
+    },
+    "Audience": {
+      "type": "parameter", 
+      "description": "JWT audience for token validation",
+      "defaultValue": "your-api",
+      "replaces": "blazor-api"
+    },
+    "CorsOrigin": {
+      "type": "parameter",
+      "description": "CORS allowed origin",
+      "defaultValue": "https://localhost:7001",
+      "replaces": "https://localhost:7001"
+    },
+    "skipRestore": {
+      "type": "parameter",
+      "datatype": "bool",
+      "description": "If specified, skips the automatic restore of the project on create.",
+      "defaultValue": "false"
+    }
+  },
+  "sources": [
+    {
+      "modifiers": [
+        {
+          "exclude": [
+            "**/[Bb]in/**",
+            "**/[Oo]bj/**",
+            ".template.config/**/*",
+            "**/*.filelist",
+            "**/*.user",
+            "**/*.lock.json",
+            "*.nupkg"
+          ]
+        }
+      ]
+    }
+  ],
+  "postActions": [
+    {
+      "condition": "(!skipRestore)",
+      "description": "Restore NuGet packages required by this project.",
+      "manualInstructions": [
+        { "text": "Run 'dotnet restore'" }
+      ],
+      "actionId": "210D431B-A78B-4D2F-B762-4ED3E3EA9025",
+      "continueOnError": true
+    }
+  ]
+}
