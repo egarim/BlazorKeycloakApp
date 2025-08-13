@@ -4,12 +4,28 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>true</IsPackable>
+    <PackageType>Template</PackageType>
+    <PackageId>KeyClokBlazorServer</PackageId>
+    <PackageVersion>2.0.0</PackageVersion>
+    <Title>KeyCloak Blazor Server Template</Title>
+    <Description>A Blazor Server template with KeyCloak OIDC authentication, comprehensive API integration, and authentication testing capabilities.</Description>
+    <PackageTags>dotnet-new;templates;blazor;server;keycloak;oidc;authentication</PackageTags>
+    <IncludeContentInPack>true</IncludeContentInPack>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <ContentTargetFolders>content</ContentTargetFolders>
+    <NoWarn>$(NoWarn);NU5128</NoWarn>
+    <EnableDefaultContentItems>false</EnableDefaultContentItems>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Cookies" Version="2.3.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="9.0.8" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.13.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="**/*" Exclude="bin/**;obj/**;**/*.user;**/.vs/**;**/.git/**;*.nupkg" />
   </ItemGroup>
 
 </Project>

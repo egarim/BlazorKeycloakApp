@@ -127,6 +127,7 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+//#if (IncludeApiIntegration)
 // Add HttpClient for API calls
 builder.Services.AddHttpClient("ApiClient", client =>
 {
@@ -143,6 +144,7 @@ builder.Services.AddScoped<BlazorServer.Services.IApiService>(provider =>
     var logger = provider.GetRequiredService<ILogger<BlazorServer.Services.ApiService>>();
     return new BlazorServer.Services.ApiService(httpClient, authService, logger);
 });
+//#endif
 
 // Add authorization
 builder.Services.AddAuthorization(options =>
@@ -160,6 +162,8 @@ builder.Services.AddScoped<WeatherForecastService>();
 // Register services
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<BlazorServer.Services.IAuthService, BlazorServer.Services.AuthService>();
+
+//#if (EnableDiagnostics)
 builder.Services.AddScoped<BlazorServer.Services.IApiDiagnosticsService>(provider =>
 {
     var httpClientFactory = provider.GetRequiredService<IHttpClientFactory>();
@@ -169,6 +173,7 @@ builder.Services.AddScoped<BlazorServer.Services.IApiDiagnosticsService>(provide
     var logger = provider.GetRequiredService<ILogger<BlazorServer.Services.ApiDiagnosticsService>>();
     return new BlazorServer.Services.ApiDiagnosticsService(httpClient, authService, configuration, logger);
 });
+//#endif
 
 var app = builder.Build();
 

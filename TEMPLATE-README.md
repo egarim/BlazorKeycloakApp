@@ -1,10 +1,24 @@
-# KeyCloak REST API Template
+# KeyCloak Templates Collection
 
-A comprehensive .NET template for creating REST APIs with KeyCloak JWT authentication integration.
+A comprehensive collection of .NET templates for creating applications with KeyCloak authentication integration.
+
+## ?? Templates Available
+
+### 1. KeyCloak REST API Template
+- **Short Name**: `keycloak-api`
+- **Package ID**: KeyClokRestApi
+- **Version**: 2.0.0
+- **Description**: REST API with KeyCloak JWT authentication, Swagger integration, and comprehensive testing endpoints
+
+### 2. KeyCloak Blazor Server Template  
+- **Short Name**: `keycloak-blazor-server`
+- **Package ID**: KeyClokBlazorServer
+- **Version**: 2.0.0
+- **Description**: Blazor Server application with KeyCloak OIDC authentication, API integration, and diagnostics
 
 ## ?? Quick Start
 
-### 1. Package the Template
+### 1. Package Both Templates
 ```bash
 # Windows (Command Prompt)
 pack.bat
@@ -13,195 +27,213 @@ pack.bat
 ./pack.ps1
 ```
 
-### 2. Install the Template
+### 2. Install Both Templates
 ```bash
 # Windows (Command Prompt)
 install-template.bat
 
 # Windows/Linux/macOS (PowerShell)
 ./install-template.ps1
-
-# Or manually
-dotnet new install "template-packages/KeyClokRestApi.2.0.0.nupkg"
 ```
 
-### 3. Create a New API Project
+### 3. Create New Projects
 ```bash
-# Basic usage
-dotnet new keycloak-api --name "My.Api"
+# Create REST API
+dotnet new keycloak-api --name "MyCompany.Api"
 
-# With custom parameters
-dotnet new keycloak-api --name "MyCompany.MyApi" --KeycloakRealm "my-realm" --ApiAudience "my-api"
+# Create Blazor Server App
+dotnet new keycloak-blazor-server --name "MyCompany.Web"
 ```
 
-### 4. Configure and Run
-```bash
-cd MyCompany.MyApi
-# Update appsettings.json with your KeyCloak settings
-dotnet run
-```
+## ??? Template Features Comparison
 
-Navigate to `https://localhost:5001` to access Swagger UI.
+| Feature | REST API Template | Blazor Server Template |
+|---------|------------------|----------------------|
+| **Authentication** | JWT Bearer | OIDC + Cookies |
+| **KeyCloak Integration** | ? Token validation | ? Full OIDC flow |
+| **Swagger UI** | ? With JWT auth | ? N/A |
+| **API Testing** | ? Built-in endpoints | ? API test page |
+| **Role Authorization** | ? Admin/User roles | ? Admin/User roles |
+| **Diagnostics** | ? Token analysis | ? Full diagnostics |
+| **CORS Support** | ? Configurable | ? N/A |
+| **Template Parameters** | 8 parameters | 8 parameters |
 
-## ?? Template Information
+## ?? Template Parameters
 
-- **Template Name**: KeyCloak REST API  
-- **Short Name**: `keycloak-api`
-- **Version**: 2.0.0
-- **Package ID**: KeyClokRestApi
+### REST API Template Parameters
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `--Framework` | `net9.0` | Target framework |
+| `--KeycloakRealm` | `blazor-app` | KeyCloak realm name |
+| `--KeycloakUrl` | `http://localhost:8080` | KeyCloak server URL |
+| `--ApiAudience` | `my-api` | API audience for JWT validation |
+| `--AllowedOrigins` | `https://localhost:7001,https://localhost:7003` | CORS origins |
+| `--EnableSwaggerInProduction` | `false` | Enable Swagger in production |
+| `--RequireHttpsMetadata` | `false` | Require HTTPS metadata |
 
-## ??? Template Parameters
+### Blazor Server Template Parameters  
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `--Framework` | `net9.0` | Target framework |
+| `--KeycloakRealm` | `blazor-app` | KeyCloak realm name |
+| `--KeycloakUrl` | `http://localhost:8080` | KeyCloak server URL |
+| `--ClientId` | `blazor-server` | KeyCloak client ID |
+| `--ClientSecret` | `your-blazor-client-secret-here` | KeyCloak client secret |
+| `--ApiBaseUrl` | `https://localhost:7002` | API server base URL |
+| `--RequireHttpsMetadata` | `false` | Require HTTPS metadata |
+| `--IncludeApiIntegration` | `true` | Include API integration services |
+| `--EnableDiagnostics` | `true` | Enable authentication diagnostics |
 
-| Parameter | Description | Default Value | Example |
-|-----------|-------------|---------------|---------|
-| `--name` | Project name | Current directory | `"My.Api"` |
-| `--Framework` | Target framework | `net9.0` | `net8.0` |
-| `--KeycloakRealm` | KeyCloak realm name | `blazor-app` | `"my-realm"` |
-| `--KeycloakUrl` | KeyCloak server URL | `http://localhost:8080` | `"https://keycloak.mycompany.com"` |
-| `--ApiAudience` | API audience for JWT validation | `my-api` | `"company-api"` |
-| `--AllowedOrigins` | Comma-separated CORS origins | `https://localhost:7001,https://localhost:7003` | `"https://myapp.com,https://admin.myapp.com"` |
-| `--EnableSwaggerInProduction` | Enable Swagger in production | `false` | `true` |
-| `--RequireHttpsMetadata` | Require HTTPS metadata | `false` | `true` |
-
-## ?? Features
-
-? **Complete KeyCloak Integration** - JWT Bearer authentication with comprehensive token validation  
-? **Swagger Integration** - Interactive API documentation with JWT authentication support  
-? **Authentication Testing** - Comprehensive endpoints for testing authentication flow  
-? **Role-based Authorization** - Support for admin/user roles from KeyCloak  
-? **CORS Configuration** - Configurable cross-origin resource sharing  
-? **Comprehensive Diagnostics** - Full authentication debugging tools  
-? **Template Parameterization** - Customizable settings via template parameters
-
-## ?? Generated API Endpoints
-
-### Authentication Testing
-- `GET /api/authtest/ping` - Health check (no auth required)
-- `GET /api/authtest/analyze-token` - Detailed JWT token analysis
-- `GET /api/authtest/auth-required` - Test basic authentication
-- `GET /api/authtest/admin-required` - Test admin role requirement
-- `GET /api/authtest/user-required` - Test user role requirement
-
-### User Management  
-- `GET /api/user/profile` - Get current user profile
-- `GET /api/user/admin-only` - Admin-only endpoint
-- `GET /api/user/user-data` - User or admin endpoint
-
-### Sample Data
-- `GET /api/values` - Public endpoint (no auth required)
-- `GET /api/values/protected` - Protected endpoint
-- `GET /api/values/admin-only` - Admin-only endpoint
-
-## ?? KeyCloak Setup
-
-1. **Create a realm** in KeyCloak
-2. **Create a client** with appropriate settings:
-   - **Client Type**: Bearer-only or Public
-   - **Valid Redirect URIs**: Configure as needed
-   - **Audience Mapper**: Add audience mapper to include API audience in tokens
-3. **Create roles** (admin, user) and assign to users
-4. **Update appsettings.json** with your KeyCloak configuration
-
-## ?? Generated Project Structure
-
-```
-MyApi/
-??? Controllers/
-?   ??? AuthTestController.cs    # Authentication testing endpoints
-?   ??? UserController.cs        # User management endpoints
-?   ??? ValuesController.cs      # Sample data endpoints
-??? appsettings.json             # Configuration (parameterized)
-??? appsettings.Development.json # Development configuration
-??? Program.cs                   # Application startup (parameterized)
-??? MyApi.csproj                 # Project file
-??? README.md                    # Project documentation
-```
-
-## ??? Management Scripts
+## ?? Management Scripts
 
 | Script | Purpose |
 |--------|---------|
-| `pack.bat` / `pack.ps1` | Package the template for distribution |
-| `install-template.bat` / `install-template.ps1` | Install the template locally |
-| `uninstall-template.bat` / `uninstall-template.ps1` | Remove the template |
+| `pack.bat` / `pack.ps1` | Package both templates for distribution |
+| `install-template.bat` / `install-template.ps1` | Install both templates locally |
+| `uninstall-template.bat` / `uninstall-template.ps1` | Remove both templates |
 
 ## ?? Usage Examples
 
-### Example 1: Basic API
+### Example 1: Simple API + Blazor App
 ```bash
-dotnet new keycloak-api --name "MyCompany.UserApi"
+# Create API
+dotnet new keycloak-api --name "MyCompany.Api"
+
+# Create Blazor Server app  
+dotnet new keycloak-blazor-server --name "MyCompany.Web"
 ```
 
 ### Example 2: Custom KeyCloak Configuration
 ```bash
+# Create API with custom settings
 dotnet new keycloak-api \
   --name "MyCompany.ProductApi" \
   --KeycloakRealm "production-realm" \
   --KeycloakUrl "https://auth.mycompany.com" \
   --ApiAudience "product-api"
+
+# Create Blazor app with matching settings
+dotnet new keycloak-blazor-server \
+  --name "MyCompany.ProductWeb" \
+  --KeycloakRealm "production-realm" \
+  --KeycloakUrl "https://auth.mycompany.com" \
+  --ClientId "product-web" \
+  --ApiBaseUrl "https://api.mycompany.com"
 ```
 
-### Example 3: Production Ready
+### Example 3: Development Setup
 ```bash
-dotnet new keycloak-api \
-  --name "MyCompany.SecureApi" \
-  --KeycloakRealm "prod-realm" \
-  --RequireHttpsMetadata true \
-  --EnableSwaggerInProduction false \
-  --AllowedOrigins "https://myapp.com,https://admin.myapp.com"
+# Minimal setup for local development
+dotnet new keycloak-api --name "DevApi" --ApiAudience "dev-api"
+dotnet new keycloak-blazor-server --name "DevWeb" --ClientId "dev-web"
 ```
 
-## ?? Testing the Generated API
+## ??? Architecture Overview
 
-1. **Start the API**:
-   ```bash
-   dotnet run
-   ```
+```
+???????????????????????    ???????????????????????    ???????????????????
+?   Blazor Server     ?    ?     REST API        ?    ?    KeyCloak     ?
+? (OIDC + Cookies)    ?????? (JWT Bearer Auth)   ??????   (Identity     ?
+?                     ?    ?                     ?    ?    Provider)    ?
+???????????????????????    ???????????????????????    ???????????????????
+         ?                           ?                          ?
+         ????????????????????????????????????????????????????????
+                                     ?
+                         ?????????????????????????
+                         ?   Shared KeyCloak     ?
+                         ?       Realm           ?
+                         ?   - Users & Roles     ?
+                         ?   - Client Configs    ?
+                         ?   - Audience Mappers  ?
+                         ?????????????????????????
+```
 
-2. **Access Swagger UI**: Navigate to `https://localhost:5001`
+## ?? Testing the Templates
 
-3. **Test Authentication**:
-   - Use the `/api/authtest/ping` endpoint to verify the API is running
-   - Get a JWT token from your KeyCloak instance
-   - Use the "Authorize" button in Swagger to add your Bearer token
-   - Test protected endpoints
+### REST API Template Testing
+1. **Create project**: `dotnet new keycloak-api --name "TestApi"`
+2. **Run**: `dotnet run`
+3. **Access Swagger**: Navigate to `https://localhost:5001`
+4. **Test endpoints**:
+   - `/api/authtest/ping` (public)
+   - `/api/authtest/analyze-token` (requires auth)
+   - `/api/values/protected` (requires auth)
+   - `/api/values/admin-only` (requires admin role)
 
-4. **Debugging**: Use the `/api/authtest/analyze-token` endpoint for detailed token analysis
+### Blazor Server Template Testing
+1. **Create project**: `dotnet new keycloak-blazor-server --name "TestWeb"`
+2. **Run**: `dotnet run`  
+3. **Access app**: Navigate to `https://localhost:5001`
+4. **Test authentication**:
+   - Visit welcome page (public)
+   - Login with KeyCloak
+   - Access protected pages
+   - Use API test page for diagnostics
 
 ## ?? Troubleshooting
 
 ### Common Issues
 
-1. **Template not found**:
+1. **Template packaging fails**:
    ```bash
-   # Ensure template is packaged
+   # Clean and rebuild
+   dotnet clean
    ./pack.ps1
-   # Then install
+   ```
+
+2. **Template installation fails**:
+   ```bash
+   # Uninstall old versions first
+   ./uninstall-template.ps1
    ./install-template.ps1
    ```
 
-2. **Authentication failures**:
-   - Verify KeyCloak realm and client configuration
-   - Check JWT token includes correct audience claim
-   - Use `/api/authtest/analyze-token` for debugging
-
-3. **CORS errors**:
-   - Verify allowed origins in `appsettings.json`
-   - Ensure client application URLs are included
+3. **Generated projects don't build**:
+   - Ensure .NET 9.0 SDK is installed
+   - Check template parameter values
+   - Verify KeyCloak configuration
 
 ### Template Development
 
-To modify the template:
-1. Make changes in the `BlazorApi` directory
+To modify templates:
+1. Make changes in `BlazorApi` or `BlazorServer` directories
 2. Run `pack.ps1` to repackage
 3. Run `uninstall-template.ps1` then `install-template.ps1` to update
 
+## ?? Requirements
+
+- **.NET 9.0 SDK** (or .NET 8.0 if using Framework parameter)
+- **KeyCloak instance** (for runtime authentication)
+- **PowerShell 7.0+** (for cross-platform scripts)
+
+## ?? Project Structure
+
+```
+BlazorKeycloakApp/
+??? BlazorApi/                          # REST API Template Source
+?   ??? .template.config/               # Template configuration
+?   ??? Controllers/                    # API controllers
+?   ??? BlazorApi.csproj               # Template project file
+?   ??? README.md                      # Template documentation
+??? BlazorServer/                      # Blazor Server Template Source  
+?   ??? .template.config/              # Template configuration
+?   ??? Pages/                         # Blazor pages
+?   ??? Services/                      # Authentication services
+?   ??? BlazorServer.csproj           # Template project file
+?   ??? README.md                     # Template documentation
+??? template-packages/                 # Generated NuGet packages
+??? pack.bat / pack.ps1               # Packaging scripts
+??? install-template.bat / .ps1       # Installation scripts
+??? uninstall-template.bat / .ps1     # Uninstallation scripts
+??? TEMPLATE-README.md                # This file
+```
+
 ## ?? License
 
-This template is designed for creating KeyCloak-authenticated REST APIs with comprehensive testing and debugging capabilities.
+These templates are designed for creating KeyCloak-authenticated applications with comprehensive testing and debugging capabilities.
 
 ---
 
-**Template Version**: 2.0.0  
+**Template Collection Version**: 2.0.0  
 **Compatible with**: .NET 8.0, .NET 9.0  
 **KeyCloak**: Any compatible version

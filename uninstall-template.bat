@@ -1,6 +1,6 @@
 @echo off
 echo ================================================
-echo  KeyCloak REST API Template Uninstaller
+echo  KeyCloak Templates Uninstaller
 echo ================================================
 echo.
 
@@ -9,13 +9,25 @@ dotnet new uninstall KeyClokRestApi
 
 if %ERRORLEVEL% neq 0 (
     echo.
-    echo ? ERROR: Failed to uninstall template!
+    echo ? ERROR: Failed to uninstall API template!
     pause
     exit /b 1
 )
 
+echo ? SUCCESS: API Template uninstalled successfully!
 echo.
-echo ? SUCCESS: Template uninstalled successfully!
+
+echo Uninstalling KeyCloak Blazor Server template...
+dotnet new uninstall KeyClokBlazorServer
+
+if %ERRORLEVEL% neq 0 (
+    echo.
+    echo ? ERROR: Failed to uninstall Blazor Server template!
+    pause
+    exit /b 1
+)
+
+echo ? SUCCESS: Blazor Server Template uninstalled successfully!
 echo.
 
 pause
