@@ -1,0 +1,108 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "KeyCloak API Template",
+  "classifications": ["Web", "WebAPI", "KeyCloak", "JWT", "API"],
+  "identity": "KeyCloak.RestApi.Template",
+  "name": "KeyCloak REST API",
+  "shortName": "keycloak-api",
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "description": "A REST API template with KeyCloak JWT authentication, Swagger integration, and comprehensive authentication testing endpoints.",
+  "sourceName": "BlazorApi",
+  "preferNameDirectory": true,
+  "placeholderFilename": "template_placeholder",
+  "symbols": {
+    "Framework": {
+      "type": "parameter",
+      "description": "The target framework for the project.",
+      "datatype": "choice",
+      "choices": [
+        {
+          "choice": "net9.0",
+          "description": ".NET 9.0"
+        },
+        {
+          "choice": "net8.0", 
+          "description": ".NET 8.0"
+        }
+      ],
+      "defaultValue": "net9.0",
+      "replaces": "net9.0"
+    },
+    "KeycloakRealm": {
+      "type": "parameter",
+      "description": "The Keycloak realm name",
+      "datatype": "string",
+      "defaultValue": "blazor-app",
+      "replaces": "blazor-app"
+    },
+    "KeycloakUrl": {
+      "type": "parameter", 
+      "description": "The Keycloak server URL",
+      "datatype": "string",
+      "defaultValue": "http://localhost:8080",
+      "replaces": "http://localhost:8080"
+    },
+    "ApiAudience": {
+      "type": "parameter",
+      "description": "The API audience for JWT token validation",
+      "datatype": "string",
+      "defaultValue": "my-api",
+      "replaces": "blazor-api"
+    },
+    "AllowedOrigins": {
+      "type": "parameter",
+      "description": "Comma-separated list of allowed CORS origins",
+      "datatype": "string", 
+      "defaultValue": "https://localhost:7001,https://localhost:7003",
+      "replaces": "https://localhost:7001\", \"https://localhost:7003"
+    },
+    "EnableSwaggerInProduction": {
+      "type": "parameter",
+      "description": "Enable Swagger UI in production environment",
+      "datatype": "bool",
+      "defaultValue": "false"
+    },
+    "RequireHttpsMetadata": {
+      "type": "parameter",
+      "description": "Require HTTPS metadata for Keycloak (set to false for local development)",
+      "datatype": "bool",
+      "defaultValue": "false"
+    }
+  },
+  "sources": [
+    {
+      "modifiers": [
+        {
+          "condition": "(!EnableSwaggerInProduction)",
+          "exclude": [
+            "Properties/launchSettings.json"
+          ]
+        }
+      ]
+    }
+  ],
+  "primaryOutputs": [
+    {
+      "path": "BlazorApi.csproj"
+    }
+  ],
+  "postActions": [
+    {
+      "condition": "(OS != \"Windows_NT\")",
+      "description": "Make scripts executable",
+      "manualInstructions": [
+        {
+          "text": "Run 'chmod +x *.sh'"
+        }
+      ],
+      "actionId": "cb9a6cf3-4f5c-4860-b9d2-03a574959774",
+      "args": {
+        "+x": "*.sh"
+      },
+      "continueOnError": true
+    }
+  ]
+}

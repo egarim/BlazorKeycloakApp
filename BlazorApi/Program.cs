@@ -13,7 +13,7 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
     {
-        Title = "Blazor Keycloak API",
+        Title = "BlazorApi Keycloak API",
         Version = "v1",
         Description = "API for testing Keycloak JWT authentication"
     });
@@ -132,16 +132,31 @@ builder.Services.AddAuthorization(options =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+//#if (EnableSwaggerInProduction)
 // Enable Swagger in all environments for testing purposes
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Blazor Keycloak API v1");
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "BlazorApi Keycloak API v1");
     c.RoutePrefix = string.Empty; // Makes Swagger UI available at the root URL
     c.DisplayOperationId();
     c.DisplayRequestDuration();
     c.DocExpansion(Swashbuckle.AspNetCore.SwaggerUI.DocExpansion.List);
 });
+//#else
+//if (app.Environment.IsDevelopment())
+//{
+//    app.UseSwagger();
+//    app.UseSwaggerUI(c =>
+//    {
+//        c.SwaggerEndpoint("/swagger/v1/swagger.json", "BlazorApi Keycloak API v1");
+//        c.RoutePrefix = string.Empty; // Makes Swagger UI available at the root URL
+//        c.DisplayOperationId();
+//        c.DisplayRequestDuration();
+//        c.DocExpansion(Swashbuckle.AspNetCore.SwaggerUI.DocExpansion.List);
+//    });
+//}
+//#endif
 
 app.UseHttpsRedirection();
 app.UseCors("DefaultPolicy");
